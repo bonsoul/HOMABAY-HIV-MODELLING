@@ -163,7 +163,314 @@ for (var in numeric_vars) {
 ```
 
 ```{r,Mutating +ve and -ne to be numerical}
-df1 <- df %>% mutate(monthsantibodytest = ifelse(tolower(monthsantibodytest) == "positive", 1, 0))
+df2 <- df1 %>% mutate(monthsantibodytest = ifelse(tolower(monthsantibodytest) == "positive", 1, 0))
 
 table(df1$monthsantibodytest)
+```
+
+### socio demo characteristic of parents
+
+```{r franc1,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr::select(subcounty, maritalstatus, residence, employmentstatus, educationlevel, monthsantibodytest) %>%
+  tbl_summary(by = monthsantibodytest) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+
+```
+
+### ANC attendance of mothers
+
+
+### ANC attendance of mothers
+```{r franc2,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr::select(ancattendance, facilitylevelanc, distancetofacility, monthsantibodytest) %>%
+  tbl_summary(
+    by = monthsantibodytest,
+    type = everything() ~ "categorical"
+  ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+```
+
+
+
+### gestation age at first anc visits wks
+
+```{r franc3,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr::select(gestationatfirstancwks, monthsantibodytest) %>%
+  tbl_summary(
+    by = monthsantibodytest,
+    type = gestationatfirstancwks ~ "continuous2",
+    statistic = list(
+      all_categorical() ~ "{p}% ({n}/{N})",
+      all_dichotomous() ~ "{p}% ({n}/{N})",
+      all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})")
+    )
+  ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+
+```
+
+### hiv status before pregnancy and syphillis
+
+```{r franc4,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr::select(hivstatusbeforepregnancy, syphillis, monthsantibodytest) %>%
+  tbl_summary(
+    by = monthsantibodytest,
+    statistic = list(
+      all_categorical() ~ "{p}% ({n}/{N})",
+      all_dichotomous() ~ "{p}% ({n}/{N})",
+      all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})")
+    )
+  ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+
+```
+
+### uti, miscarriage
+
+```{r franc5,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr::select(uti, miscarriage, abortion, stillbirth, premature, monthsantibodytest) %>%
+  tbl_summary(
+    by = monthsantibodytest,
+    statistic = list(
+      all_categorical() ~ "{p}% ({n}/{N})",
+      all_dichotomous() ~ "{p}% ({n}/{N})",
+      all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})")
+    )
+  ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+
+```
+
+### HIV and CD4
+
+```{r franc6,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr::select(haartduringpregnancy, cd4cellcountcellsmm3, monthsantibodytest) %>%
+  tbl_summary(
+    by = monthsantibodytest,
+    statistic = list(
+      all_categorical() ~ "{p}% ({n}/{N})",
+      all_dichotomous() ~ "{p}% ({n}/{N})",
+      all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})")
+    )
+  ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+
+```
+
+### mother history of having sexually transmitted disease during pregnancy
+
+```{r franc7,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr::select(historyofstiduringpregnancy, genitalwart, vaginaldischargesyndrome, genitalherpes, monthsantibodytest) %>%
+  tbl_summary(
+    by = monthsantibodytest,
+    statistic = list(
+      all_categorical() ~ "{p}% ({n}/{N})",
+      all_dichotomous() ~ "{p}% ({n}/{N})",
+      all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})")
+    )
+  ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+
+```
+
+### treatedduringpregnancy
+
+```{r franc8,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr::select(treatedduringpregnancy, monthsantibodytest) %>%
+  tbl_summary(
+    by = monthsantibodytest,
+    statistic = list(
+      all_categorical() ~ "{p}% ({n}/{N})",
+      all_dichotomous() ~ "{p}% ({n}/{N})",
+      all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})")
+    )
+  ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+
+```
+
+### malaria, anaemia, hypertention
+
+```{r franc9,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr::select(malaria, anaemia, hypertention, monthsantibodytest) %>%
+  tbl_summary(
+    by = monthsantibodytest,
+    statistic = list(
+      all_categorical() ~ "{p}% ({n}/{N})",
+      all_dichotomous() ~ "{p}% ({n}/{N})",
+      all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})")
+    )
+  ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+```
+
+### numberofchildren
+
+```{r franc10,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr::select(numberofchildren, monthsantibodytest) %>%
+  tbl_summary(
+    by = monthsantibodytest,
+    type = numberofchildren ~ "categorical",
+    statistic = list(
+      all_categorical() ~ "{p}% ({n}/{N})",
+      all_dichotomous() ~ "{p}% ({n}/{N})",
+      all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})")
+    )
+  ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+
+```
+
+### patnershivstatus, whohivdiseasestage
+
+```{r franc12,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr::select(patnershivstatus, whohivdiseasestage, monthsantibodytest) %>%
+  tbl_summary(
+    by = monthsantibodytest,
+    statistic = list(
+      all_categorical() ~ "{p}% ({n}/{N})",
+      all_dichotomous() ~ "{p}% ({n}/{N})",
+      all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})")
+    )
+  ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+
+```
+
+### numberofancvisitsmade
+
+```{r franc13,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr::select(numberofancvisitsmade, monthsantibodytest) %>%
+  tbl_summary(
+    by=monthsantibodytest,
+    type = numberofancvisitsmade ~ "categorical",
+    statistic = list(all_categorical() ~ "{p}% ({n}/{N})",
+                  all_dichotomous() ~ "{p}% ({n}/{N})",
+                     all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})"))
+   ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+```
+
+### hemoglobinlevelduringpregnancy
+
+```{r franc14,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr:: select(hemoglobinlevelduringpregnancy, monthsantibodytest) %>%
+  tbl_summary(
+    by=monthsantibodytest,
+    type = hemoglobinlevelduringpregnancy ~ "continuous2",
+    statistic = list(all_categorical() ~ "{p}% ({n}/{N})",
+                  all_dichotomous() ~ "{p}% ({n}/{N})",
+                     all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})"))
+   ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+```
+
+### durationofbfmonths
+
+```{r franc15,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr:: select(lduration,durationofbfmonths, monthsantibodytest) %>%
+  tbl_summary(
+    by=monthsantibodytest,
+    type = durationofbfmonths ~ "continuous2",
+    statistic = list(all_categorical() ~ "{p}% ({n}/{N})",
+                  all_dichotomous() ~ "{p}% ({n}/{N})",
+                     all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})"))
+   ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+```
+
+### sexofthebaby
+
+```{r franc16,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr:: select(sexofthebaby, monthsantibodytest) %>%
+  tbl_summary(
+    by=monthsantibodytest,
+   # type = durationofbfmonths ~ "continuous2",
+    statistic = list(all_categorical() ~ "{p}% ({n}/{N})",
+                  all_dichotomous() ~ "{p}% ({n}/{N})",
+                     all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})"))
+   ) %>%
+  add_overall() %>%
+  add_p() %>%
+  bold_labels()
+```
+
+#subcounty
+
+```{r franc17,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+df2 %>%
+  dplyr:: select(subcounty, monthsantibodytest) %>%
+  tbl_summary(
+    by = monthsantibodytest,  # Grouping by monthsantibodytest
+    statistic = list(
+      all_categorical() ~ "{p}% ({n}/{N})",
+      all_dichotomous() ~ "{p}% ({n}/{N})",
+      all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})")
+    )
+  ) %>%
+  add_overall() %>%  # Now valid because `by` is specified
+  add_p() %>%
+  bold_labels()
+
+```
+
+
+### PCR test trend
+
+```{r franc17,echo=FALSE, message=FALSE, warning=FALSE, include=T}
+data_fr %>%
+  select(birthpcr,weekspcr, monthspcr,yearpcr,monthsantibodytest) %>%
+  tbl_summary(
+   # by=monthsantibodytest,
+   # type = durationofbfmonths ~ "continuous2",
+    statistic = list(all_categorical() ~ "{p}% ({n}/{N})",
+                  all_dichotomous() ~ "{p}% ({n}/{N})",
+                     all_continuous2() ~ c("{median} ({min} - {max})", "{mean} ({sd})"))
+   ) %>%
+  #add_overall() %>%
+ # add_p() %>%
+  bold_labels()
 ```
