@@ -457,7 +457,6 @@ df2 %>%
 
 ```
 
-
 ### PCR test trend
 
 ```{r franc17,echo=FALSE, message=FALSE, warning=FALSE, include=T}
@@ -474,3 +473,104 @@ data_fr %>%
  # add_p() %>%
   bold_labels()
 ```
+
+
+```{r, pvalue}
+# Define dependent variable
+dependent_var <- "monthsantibodytest"
+
+# Define categorical variables
+categorical_vars <- c(
+  "subcounty", "maritalstatus", "historyofstiduringpregnancy", "hypertension", 
+  "partnershivstatus", "whohivdiseasestage", "t_membrane_r", "sexofthebaby", 
+  "residence", "syphillis", "cd4cellcountcellsmm3", "employmentstatus", 
+  "ancattendance", "facilitylevelanc", "hivstatusbeforepregnancy", "syphilis", 
+  "uti", "miscarriage", "abortion", "stillbirth", "premature", 
+  "haartduringpregnancy", "cd4cellcount", "historysti_during_pregnancy", "distancetofacility",
+  "genitalwart", "vaginaldischargesyndrome", "genitalherpes", 
+  "treatedduringpregnancy", "malaria", "anaemia", "hypertension", 
+  "partnerhivstatus", "whohivdiseasestage", "t_membrane_r", "sexbaby", 
+  "educationlevel", "adherence","tmembraner", "hypertention","patnershivstatus"
+)
+
+# Filter only variables that exist in df1
+all_vars <- categorical_vars[categorical_vars %in% names(df2)]
+
+# Perform chi-square tests
+chi_results <- lapply(all_vars, function(var) {
+  table_data <- table(df1[[var]], df2[[dependent_var]])
+  test <- chisq.test(table_data)
+  data.frame(variable = var, chi2_value = test$statistic, p_value = test$p.value)
+})
+
+# Combine results into a data frame
+chi_result_df <- do.call(rbind, chi_results)
+
+# Display results in an HTML table
+kable(chi_result_df, format = "html", digits = 4, caption = "Table 1: Chi-square Test Results for HIV Antigen Positivity") %>%
+  kable_styling(full_width = FALSE, position = "left", font_size = 14) %>%
+  column_spec(1, bold = TRUE) %>%   
+  column_spec(2, width = "5cm") %>% 
+  column_spec(3, width = "5cm") %>% 
+  footnote(general = "Source: Computed results based on chi-square test.")
+```
+
+```{r,bivariate}
+# Define dependent variable
+dependent_var <- "monthsantibodytest"  
+
+# List of independent variables for bivariate logistic regression
+independent_vars <- c(
+  "ancattendance", "haartduringpregnancy", "whohivdiseasestage", "numberofancvisitsmade",
+  "lduration", "durationofbfmonths", "educationlevel", "adherence",
+  "hivstatusbeforepregnancy", "premature"
+) 
+
+# Filter variables that exist in df1
+available_vars <- independent_vars[independent_vars %in% names(df2)]
+
+# Function to perform bivariate logistic regression
+logit_results <- lapply(available_vars, function(var) {
+  formula <- as.formula(paste(dependent_var, "~", var))
+  
+  # Handle potential errors in model fitting
+  result <- tryCatch({
+    model <- glm(formula, data = df2, family = binomial)
+    tidy_model <- tidy(model, conf.int = TRUE)  # Get summary with confidence intervals
+    
+    # Format output
+    data.frame(
+      Variable = var,
+      Odds_Ratio = round(exp(tidy_model$estimate[2]), 4),  # Exponentiate coefficient
+      CI_Low = round(exp(tidy_model$conf.low[2]), 3),
+      CI_High = round(exp(tidy_model$conf.high[2]), 3),
+      P_Value = round(tidy_model$p.value[2], 4)
+    )
+  }, error = function(e) {
+    # If error occurs, return NA values
+    data.frame(
+      Variable = var, Odds_Ratio = NA, CI_Low = NA, CI_High = NA, P_Value = NA
+    )
+  })
+  
+  return(result)
+})
+
+# Combine results into a data frame
+bivar_logit_results_df <- do.call(rbind, logit_results) %>%
+  as_tibble() %>%  
+  mutate(CI = paste0("[", CI_Low, "-", CI_High, "]")) %>%
+  dplyr::select(Variable, Odds_Ratio, CI, P_Value)
+  #select(Variable, Odds_Ratio, CI, P_Value) 
+
+# Display results in an HTML table
+kable(bivar_logit_results_df, format = "html", digits = 4, 
+      caption = "Table 4.2: Factors Associated with HIV Antigen Positivity by Bivariate Logistic Regression") %>%
+  kable_styling(full_width = FALSE, position = "left", font_size = 14) %>%
+  column_spec(1, bold = TRUE) %>%   
+  column_spec(2, width = "5cm") %>% 
+  column_spec(3, width = "5cm") %>% 
+  column_spec(4, width = "5cm") %>% 
+  footnote(general = "Source: Computed results based on bivariate logistic regression.")
+```
+
