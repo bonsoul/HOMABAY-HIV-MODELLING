@@ -1,14 +1,169 @@
 ---
 title: "Homabay - HIV/AIDS Modelling"
 author: "Bonsoul"
-date: "2025-03-27"
-output: html_document
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  html_document: default
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r,libararies}
+library(ggplot2)
+library(tidyverse)
+library(plotly)
+library(rlang)
+library(psych)
+library(knitr)
+library(stringr)
+library(questionr)
+library(gtsummary)
+library(shiny)
+library(lubridate)
+library(magrittr)
+library(expss)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(CARBayes)
+library(gridExtra)             
+library(grid) 
+library(survival)
+library(caret) 
+library(randomForest) 
+library(dplyr) 
+library(corrplot) 
+library(readxl) 
+library(tidyr) 
+library(survminer) 
+library(sf) 
+library(tmap)
+library(RColorBrewer)
+library(kableExtra)
+library(broom)
+library(spdep)
+library(brglm2)
+```
+
+```{r,reading data}
+df = read_excel("D:/Downloads/HIV - VARIABLES.xlsx")
+View(df)
 ```
 
 
+```{r,EDA}
+#Rename coordinate columns for clarity
+df1 <- df %>% rename(latitude = var52, longitude = var51)
+
+duplicates <- df1[duplicated(df1),] #checking duplicates
+print(duplicates)
 
 
+missing_per_column <- colSums(is.na(df1)) #columns with null values
+total_missing <- sum(missing_per_column) 
+print(total_missing) 
+print(missing_per_column)
+
+columns_with_missing <- names(missing_per_column[missing_per_column > 0]) 
+print(columns_with_missing)
+```
+```{r Summary statistics for numerical variables }
+#Compute summary statistics for numeric columns
+summary_stats <- df1 %>% 
+  select_if(is.numeric) %>% 
+  summarise(across(
+    everything(), 
+    list(
+      min = ~min(., na.rm = TRUE),
+      Q1 = ~quantile(., 0.25, na.rm = TRUE),
+      median = ~median(., na.rm = TRUE),
+      mean = ~mean(., na.rm = TRUE),
+      Q3 = ~quantile(., 0.75, na.rm = TRUE),
+      max = ~max(., na.rm = TRUE),
+      sd = ~sd(., na.rm = TRUE)
+    )
+  ))
+summary(summary_stats)
+```
+
+```{r  Frequency distribution for categorical variables}
+categorical_vars <- df1 %>%
+  select_if(is.character)
+
+for (var in names(categorical_vars)) {
+  print(var)
+  print(table(categorical_vars[[var]]))
+}
+```
+
+```{r,hitograms}
+#Visualize distributions with histograms
+
+ggplot(df1, aes(x = age)) + 
+  geom_histogram(binwidth = 5, fill = "blue", alpha = 0.7) + 
+  ggtitle("Histogram of Age") + 
+  theme_minimal()
+  
+  
+ggplot(df1, aes(x = weightkg)) + 
+  geom_histogram(binwidth = 5, fill = "blue", alpha = 0.7) + 
+  ggtitle("Histogram of weightkg") + 
+  theme_minimal()
+  
+
+ggplot(df1, aes(x = durationofbfmonths)) + 
+  geom_histogram(binwidth = 5, fill = "blue", alpha = 0.7) + 
+  ggtitle("Histogram of durationofbfmonths") + 
+  theme_minimal()
+```
+
+
+```{r,boxplots}
+# Define numeric variables for boxplots
+numeric_vars <- c("age", "weightkg", "bwtkgs", "babywt6wks", "time", "_t")
+
+# Create boxplots for each numeric variable
+for (var in numeric_vars) {
+  p <- ggplot(df1, aes(x = monthsantibodytest, y = .data[[var]], fill = monthsantibodytest)) +
+    geom_boxplot() +
+    labs(title = paste("Boxplot of", var, "by Months Antibody Test"),
+         x = "Months Antibody Test",
+         y = var) +
+    theme_minimal()
+  
+  print(p)
+}
+```
+
+```{r,gender distribution}
+# Create a bar chart for gender distribution
+gender_plot <- ggplot(df1, aes(x = sexofthebaby, fill = sexofthebaby)) +
+  geom_bar() +
+  labs(title = "Gender Distribution",
+       x = "Gender",
+       y = "Count") +
+  theme_minimal()
+
+print(gender_plot)
+```
+```{r,density plots}
+# Create density plots
+for (var in numeric_vars) {
+  density_plot <- ggplot(df1, aes(x = .data[[var]], color = monthsantibodytest)) +
+    geom_density() +
+    labs(title = paste("Density Plot of", var), x = var, y = "Density") +
+    theme_minimal()
+  
+  print(density_plot)
+}
+```
+
+```{r,Mutating +ve and -ne to be numerical}
+df1 <- df %>% mutate(monthsantibodytest = ifelse(tolower(monthsantibodytest) == "positive", 1, 0))
+
+table(df1$monthsantibodytest)
+```
